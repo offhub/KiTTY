@@ -23,7 +23,7 @@ jobs:
             -e USR_UID=$(id -u) \
             -e USR_GID=$(id -g) \
             cyd01/cross-gcc \
-            "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cd /builds ; ls -l"
+            "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross CFLAGS_EXTRA='-mno-avxneconvert' ; cd /builds ; ls -l"
       - uses: actions/upload-artifact@v4
         with:
           name: kitty-32bit
@@ -42,7 +42,7 @@ jobs:
             -e USR_UID=$(id -u) \
             -e USR_GID=$(id -g) \
             cyd01/cross-gcc \
-            "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 ; cd /builds ; ls -l"
+            "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 CFLAGS_EXTRA='-mno-avxneconvert' ; cd /builds ; ls -l"
       - uses: actions/upload-artifact@v4
         with:
           name: kitty-64bit
