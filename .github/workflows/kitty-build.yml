@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - v*
-  workflow_dispatch:  # Allow manual run via GitHub UI
+  workflow_dispatch:
 
 env:
   VERSION: 0.76b
@@ -15,14 +15,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build (32-bit)
+      - name: Build (32-bit, cross-docker)
         run: |
-          mkdir -p builds
-          docker run --rm -i \
+          mkdir -p builds 2>/dev/null || rm -f builds/*.exe
+          docker run --rm -it \
             -v ${{ github.workspace }}/builds:/builds \
-            -v ${{ github.workspace }}:/sources \
+            -e USR_UID=$(id -u) \
+            -e USR_GID=$(id -g) \
             cyd01/cross-gcc \
-            "cd ${VERSION}_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cp *.exe /builds/"
+            "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cd /builds ; ls -l"
       - uses: actions/upload-artifact@v4
         with:
           name: kitty-32bit
@@ -33,14 +34,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build (64-bit)
+      - name: Build (64-bit, cross-docker)
         run: |
-          mkdir -p builds
-          docker run --rm -i \
+          mkdir -p builds 2>/dev/null || rm -f builds/*.exe
+          docker run --rm -it \
             -v ${{ github.workspace }}/builds:/builds \
-            -v ${{ github.workspace }}:/sources \
+            -e USR_UID=$(id -u) \
+            -e USR_GID=$(id -g) \
             cyd01/cross-gcc \
-            "cd ${VERSION}_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 ; cp *.exe /builds/"
+            "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 ; cd /builds ; ls -l"
       - uses: actions/upload-artifact@v4
         with:
           name: kitty-64bit
