@@ -18,7 +18,7 @@ jobs:
       - name: Build (32-bit, cross-docker)
         run: |
           mkdir -p builds 2>/dev/null || rm -f builds/*.exe
-          docker run --rm -it \
+          docker run --rm \
             -v ${{ github.workspace }}/builds:/builds \
             -e USR_UID=$(id -u) \
             -e USR_GID=$(id -g) \
@@ -37,7 +37,7 @@ jobs:
       - name: Build (64-bit, cross-docker)
         run: |
           mkdir -p builds 2>/dev/null || rm -f builds/*.exe
-          docker run --rm -it \
+          docker run --rm \
             -v ${{ github.workspace }}/builds:/builds \
             -e USR_UID=$(id -u) \
             -e USR_GID=$(id -g) \
