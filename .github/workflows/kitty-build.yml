@@ -1,49 +1,38 @@
-name: Build KiTTY (Windows 32/64bit)
+name: Build KiTTY
 
 on:
   push:
-    tags:
-      - v*
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
-env:
-  VERSION: 0.76b
-
 jobs:
-  build32:
-    name: Windows 32-bit
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [32bit, 64bit]
+    name: Build KiTTY (${{ matrix.target }})
     steps:
-      - uses: actions/checkout@v4
-      - name: Build (32-bit, cross-docker)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Create builds directory
+        run: mkdir -p builds
+        
+      - name: Build KiTTY
         run: |
-          mkdir -p builds 2>/dev/null || rm -f builds/*.exe
-          docker run --rm \
-            -v ${{ github.workspace }}/builds:/builds \
-            -e USR_UID=$(id -u) \
-            -e USR_GID=$(id -g) \
+          docker run --rm -v $(pwd)/builds:/builds \
+            -e USR_UID=$(id -u) -e USR_GID=$(id -g) \
             cyd01/cross-gcc \
-            "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross CFLAGS_EXTRA='-mno-avxneconvert' ; cd /builds ; ls -l"
-      - uses: actions/upload-artifact@v4
+            "git clone https://github.com/cyd01/KiTTY.git ; \
+             cd KiTTY/0.76b_My_PuTTY/windows ; \
+             make -f MAKEFILE.MINGW cross$([[ '${{ matrix.target }}' == '64bit' ]] && echo '64') ; \
+             cd /builds ; ls -l"
+             
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: kitty-32bit
-          path: builds/
-
-  build64:
-    name: Windows 64-bit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build (64-bit, cross-docker)
-        run: |
-          mkdir -p builds 2>/dev/null || rm -f builds/*.exe
-          docker run --rm \
-            -v ${{ github.workspace }}/builds:/builds \
-            -e USR_UID=$(id -u) \
-            -e USR_GID=$(id -g) \
-            cyd01/cross-gcc \
-            "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 CFLAGS_EXTRA='-mno-avxneconvert' ; cd /builds ; ls -l"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: kitty-64bit
+          name: kitty-${{ matrix.target }}
           path: builds/
